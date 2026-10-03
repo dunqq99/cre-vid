@@ -1,0 +1,22 @@
+import {test,expect} from '@playwright/test';
+test('shows publishing setup and protects real social API mutations',async({page,request})=>{
+ const project=await (await request.post('/api/projects',{data:{title:'Kiểm thử cấu hình xuất bản'}})).json();
+ const status=await request.get(`/api/social?projectId=${project.id}`);expect(status.ok()).toBeTruthy();const data=await status.json();expect(data.configuration.x.callback).toContain('/api/social/callback/x');expect(data.accounts.every((a:Record<string,unknown>)=>!('accessToken' in a)&&!('refreshToken' in a))).toBe(true);
+ const denied=await request.post('/api/social',{headers:{Origin:'https://evil.example'},data:{action:'connect',provider:'x'}});expect(denied.status()).toBe(403);
+ const callback=await request.get('/api/social/callback/x?state=forged&code=secret-code');expect(callback.status()).toBe(400);expect(await callback.text()).not.toContain('secret-code');
+ await page.addInitScript(id=>localStorage.setItem('crevid-project',id),project.id);await page.goto('/');await page.getByRole('button',{name:'Output',exact:true}).click();
+ const panel=page.getByRole('region',{name:'Xuất bản mạng xã hội'});await expect(panel).toBeVisible();await expect(panel.getByLabel('Video xuất bản')).toHaveValue('');await expect(panel.getByRole('button',{name:'Xem lại bài đăng'})).toBeDisabled();
+ await panel.getByLabel('Nền tảng đăng').selectOption('x');await expect(panel.getByText(/Video tối đa 140 giây/)).toBeVisible();await panel.scrollIntoViewIfNeeded();await page.screenshot({path:'/private/tmp/crevid-publishing-setup.png',fullPage:true});
+});
+test('requires review of the exact render and account before submitting once',async({page,request})=>{
+ const project=await (await request.post('/api/projects',{data:{title:'Bản tin thử giao diện đăng'}})).json();
+ const job={id:'test-render',projectId:project.id,kind:'render',state:'succeeded',revision:project.revision,snapshot:project,options:{preset:'full'},createdAt:new Date().toISOString(),progress:100,message:'Hoàn thành',outputs:[{name:'MP4',file:'test-render.mp4',mime:'video/mp4'}]};
+ const account={id:'x-123',provider:'x',name:'@test_only',remoteId:'123'};let submissions=0;let publications:unknown[]=[];
+ await page.route('**/api/actions?**',route=>route.fulfill({json:[job]}));
+ await page.route('**/api/status',route=>route.fulfill({json:{worker:true,providers:{vbee:false,azure:false,vbeeVoice:''}}}));
+ await page.route('**/api/media/**/test-render.mp4',route=>route.fulfill({status:204}));
+ await page.route('**/api/social?**',async route=>{if(route.request().method()==='POST'){const body=route.request().postDataJSON();expect(body.action).toBe('publish');expect(body.approved).toBe(true);expect(body.renderId).toBe('test-render');expect(body.accountId).toBe('x-123');expect(body.text).toBe('Nội dung đã duyệt');submissions++;publications=[{...body,id:'publication-1',revision:project.revision,accountName:account.name,provider:'x',state:'queued',message:'Đang chờ worker đăng video',createdAt:job.createdAt}];await route.fulfill({json:publications[0]});return;}await route.fulfill({json:{accounts:[account],publications,configuration:{facebook:{ready:false,missing:['FACEBOOK_APP_ID'],callback:'http://127.0.0.1:3000/api/social/callback/facebook'},x:{ready:true,missing:[],callback:'http://127.0.0.1:3000/api/social/callback/x'}}}});});
+ await page.addInitScript(id=>localStorage.setItem('crevid-project',id),project.id);await page.goto('/');await page.getByRole('button',{name:'Output',exact:true}).click();const panel=page.getByRole('region',{name:'Xuất bản mạng xã hội'});
+ await panel.getByLabel('Nền tảng đăng').selectOption('x');await panel.getByLabel('Tài khoản X',{exact:true}).selectOption('x-123');await panel.getByLabel('Video xuất bản').selectOption('test-render');await panel.getByLabel('Nội dung bài đăng').fill('Nội dung đã duyệt');expect(submissions).toBe(0);
+ await panel.getByRole('button',{name:'Xem lại bài đăng'}).click();const publish=panel.getByRole('button',{name:'Đăng ngay lên X'});await expect(publish).toBeDisabled();await panel.getByLabel(/Tôi đã kiểm tra đúng tài khoản/).check();await expect(publish).toBeEnabled();await page.screenshot({path:'/private/tmp/crevid-publishing-review.png',fullPage:true});await publish.click();await expect(panel.getByText('Đang chờ worker đăng video')).toBeVisible();await expect(panel.getByRole('button',{name:'Xem lại bài đăng'})).toBeDisabled();expect(submissions).toBe(1);
+});

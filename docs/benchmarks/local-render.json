@@ -1,0 +1,18 @@
+{
+  "date": "2026-09-28T20:36:47.153Z",
+  "system": "darwin",
+  "arch": "arm64",
+  "cpu": "Apple M4",
+  "cores": 10,
+  "memoryGiB": 16,
+  "videoSeconds": 60,
+  "resolution": "1080x1920",
+  "fps": 30,
+  "template": "breaking",
+  "concurrency": 2,
+  "elapsedSeconds": 100.326666875,
+  "ratio": 1.6721111145833334,
+  "fixture": "3 scenes, vector background, headlines, watermark, Vietnamese captions; no uploaded video and no TTS",
+  "jobId": "24eba2a1-9395-4ec9-bbd2-ed6050a120d8",
+  "projectId": "1edb25ba-f53b-444f-b181-aceff61e3356"
+}

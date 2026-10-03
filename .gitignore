@@ -1,0 +1,12 @@
+node_modules/
+.next/
+.data/
+.env*
+!.env.example
+test-results/
+playwright-report/
+*.tsbuildinfo
+.superpowers/
+next-env.d.ts
+.DS_Store
+*.log

@@ -1,0 +1,13 @@
+{
+  "resolution": "1080x1920",
+  "seconds": 2,
+  "layouts": [
+    "4:3",
+    "1:1"
+  ],
+  "source": "Generated 640x480 video with 440 Hz sine; trim 0.2s and loop",
+  "signOpacity": 0.4,
+  "originalAudioVolume": 0.35,
+  "audioRms": 0.030634836652395196,
+  "checkedAt": "2026-09-29T17:07:00.989Z"
+}

@@ -1,0 +1,20 @@
+[
+  {
+    "template": "sports",
+    "resolution": "1080x1920",
+    "videoSeconds": 2,
+    "elapsedSeconds": 7.671
+  },
+  {
+    "template": "cinema",
+    "resolution": "1080x1920",
+    "videoSeconds": 2,
+    "elapsedSeconds": 4.497
+  },
+  {
+    "template": "shorts",
+    "resolution": "1080x1920",
+    "videoSeconds": 2,
+    "elapsedSeconds": 4.708
+  }
+]
