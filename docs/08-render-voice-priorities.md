@@ -1,5 +1,8 @@
 # 08 — Ưu tiên tốc độ render và giọng đọc
 
+> Cập nhật 03/10/2026: Cre-vid hiện dùng hai giọng TTS local trên CPU, không cần Vbee/Azure. Các mục provider bên dưới là lịch sử phương án cũ. Xem [TTS local](18-local-tts.md) để biết cách cài và kết quả kiểm tra thực tế.
+
+
 Cập nhật ngày 2026-09-29 từ các mối quan tâm người dùng: render hoạt động thế nào, có nhanh không, nguồn giọng Ngọc Huyền và khả năng dùng giọng AI. Đã có benchmark local cơ bản: video 60 giây/1080p mất 100,3 giây trên M4/16 GB, fixture chưa có video tải lên/TTS. Chưa thử giọng qua tài khoản thật. Xem [số đo và cấu hình máy chủ](11-render-server-requirements.md) cùng [trạng thái triển khai](10-implementation-status.md). Các mục đo mở rộng bên dưới vẫn là kế hoạch.
 
 ## Render hoạt động thế nào?

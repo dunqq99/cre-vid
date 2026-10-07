@@ -17,7 +17,7 @@ Kiểm chứng bằng bản sao sạch chỉ chứa file chuẩn bị commit, kh
 | Dự án và kịch bản | Tạo/mở/lưu, tự lưu, revision, các cảnh Intro/Body; tự chuyển Outro cũ đã sửa thành Body, chỉnh lời đọc/tiêu đề/thời lượng, thêm/xóa/sắp xếp cảnh | Đã kiểm thử lưu và mở lại; kho JSON local có khóa |
 | Tư liệu | Upload ảnh/video/audio, kiểm tra định dạng, chuẩn hóa, chọn cho cảnh, crop/fit, trim và tắt tiếng gốc | 100 MB/file, 50 asset/dự án; chưa nghiệm thu mọi loại media |
 | Bài báo → bản nháp | Dán URL để lấy bài, nhập tối đa 6 ảnh mới, đề xuất các đoạn và gợi ý cách đọc; chỉ thay cảnh sau khi bấm áp dụng | Trích xuất theo quy tắc, chưa dùng LLM; website chặn bot/JavaScript có thể thất bại |
-| Voice | Nhập audio theo cảnh, đo thời lượng và mở rộng cảnh theo voice, phát hiện lời đọc đã thay đổi | Upload hoạt động; Vbee/Azure đã có adapter nhưng chưa gọi TTS bằng tài khoản thật |
+| Voice | TTS local Hải Đăng/Trúc Ly (mặc định 1×), nhập audio, đo thời lượng cảnh và phát hiện lời đọc cũ | Đã sinh cả hai giọng offline, thao tác trong Studio và render MP4 có âm thanh. [Cài đặt và kiểm chứng](18-local-tts.md) |
 | Hai chế độ tiêu đề | Chỉ Intro hoặc cùng tiêu đề trên toàn video | Kiểm thử Intro/Body và lưu cấu hình |
 | Template | Bảy mẫu: Xanh bản đồ, Đỏ hồng, Khung bản tin, Thẻ nổi bật, Thể thao, Phim ảnh, YouTube Shorts; giữ ba mẫu đơn giản cũ | Có MP4 mẫu thật; [hướng dẫn](09-reference-styles.md) |
 | Tùy chỉnh template | Màu, tên, watermark, sign, nguồn; mẫu thẻ trắng có chữ nhấn màu và tối đa hai ảnh tròn; mẫu đỏ hồng có hàng biểu tượng | Đã kiểm tra các mẫu trong trình duyệt, chữ tiếng Việt và ảnh render |
@@ -64,7 +64,7 @@ Mã liên quan: [Studio](../src/components/Studio.tsx), [BrandMark](../src/video
 ## Còn lại trước nghiệm thu đầy đủ
 
 1. Xác nhận cảnh báo Fast Refresh đã hết trên tab người dùng sau reload.
-2. Cấu hình tài khoản TTS, gọi thật và nghe thử Ngọc Huyền/Azure; gợi ý nhấn giọng hiện chưa điều khiển cảm xúc TTS tự động.
+2. Nghe và duyệt chất lượng hai giọng local theo nội dung thực tế; gợi ý nhấn giọng hiện chưa điều khiển cảm xúc TTS tự động.
 3. Chốt website báo hỗ trợ và kiểm thử nguồn thật; nghiệm thu ma trận clip xoay/VFR/âm thanh/tỷ lệ/tiêu đề dài. Phụ đề hiện ước lượng theo câu, chưa căn từng từ theo âm thanh.
 4. Chạy benchmark hỗn hợp ảnh + clip + voice + nhạc trên máy chủ đích. Chưa có số đo tải CPU/RAM đỉnh trên VPS.
 5. Bổ sung đăng nhập, phân quyền, persistence/queue production, backup và quy trình triển khai trước khi mở cho nhóm qua Internet. Bản hiện tại single-user/local, một job chạy mỗi lần.

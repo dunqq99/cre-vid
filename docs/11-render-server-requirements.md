@@ -1,5 +1,8 @@
 # 11 — Yêu cầu máy chủ render
 
+> Cập nhật 03/10/2026: Cre-vid hiện dùng hai giọng TTS local trên CPU, không cần Vbee/Azure. Các mục provider bên dưới là lịch sử phương án cũ. Xem [TTS local](18-local-tts.md) để biết cách cài và kết quả kiểm tra thực tế.
+
+
 Cập nhật: 29/09/2026. Căn cứ: mã đang dùng, benchmark local đã lưu và tài liệu Remotion chính thức. Chưa thử trên VPS; cấu hình dưới đây là đề xuất khởi điểm của dự án, không phải cấu hình tối thiểu được Remotion chứng nhận hoặc cam kết thời gian render.
 
 ## Có cần CPU mạnh không?

@@ -1,7 +1,8 @@
 import {writeFile,mkdir} from 'node:fs/promises';import path from 'node:path';
-import {store} from './lib/store';import {renderProject} from './lib/render';import {synthesize} from './lib/integrations';import {ingestMedia} from './lib/media';
+import {store} from './lib/store';import {renderProject} from './lib/render';import {synthesizeLocal,stopLocalTts} from './lib/local-tts';import {ingestMedia} from './lib/media';
 import {PublishQueue} from './lib/social/queue';
 const publishing=new PublishQueue(store);
+for(const signal of ['SIGINT','SIGTERM'] as const)process.once(signal,()=>{void stopLocalTts().finally(()=>process.exit(0));});
 await store.init();
 const heartbeat=async()=>writeFile(path.join(store.root,'worker-heartbeat'),String(Date.now()));await heartbeat();setInterval(()=>void heartbeat().catch(console.error),4000);
 console.log('Cre-vid worker ready. Data:',store.root);
@@ -11,11 +12,12 @@ for(;;){
  const timer=setInterval(async()=>{if(polling)return;polling=true;try{const current=await store.getJob(job.id);if(current.state==='canceled')controller.abort();else await store.updateJob(job.id,{heartbeat:new Date().toISOString(),progress,message});}catch(e){console.error('Job heartbeat failed',e);}finally{polling=false;}},1000);
  try{
   let outputs;
-  if(job.kind==='render')outputs=await renderProject(job,store,(n,m)=>{progress=n;message=m;},controller.signal);
+  if(job.kind==='render'){await stopLocalTts();outputs=await renderProject(job,store,(n,m)=>{progress=n;message=m;},controller.signal);}
   else{
    const scene=job.snapshot.scenes.find(s=>s.id===job.options.sceneId)!;message='Đang tạo giọng đọc';
-   const audio=await synthesize(scene.text,job.options.provider!,job.options.voiceId!,job.options.speed||1,controller.signal);controller.signal.throwIfAborted();
-   const dir=path.join(store.root,'media',job.projectId);await mkdir(dir,{recursive:true});const asset=await ingestMedia(dir,`Voice-${scene.kind}.mp3`,audio);controller.signal.throwIfAborted();await store.attachVoice(job,asset);
+   if(job.options.provider!=='local')throw new Error('Tác vụ dùng dịch vụ giọng cũ. Hãy tạo lại bằng giọng Nam/Nữ local.');
+   const audio=await synthesizeLocal(scene.text,job.options.voiceId!,job.options.speed||1,controller.signal);controller.signal.throwIfAborted();
+   const dir=path.join(store.root,'media',job.projectId);await mkdir(dir,{recursive:true});const asset=await ingestMedia(dir,`Voice-${job.options.voiceId}-${scene.kind}.wav`,audio);controller.signal.throwIfAborted();await store.attachVoice(job,asset);
    outputs=[{name:'Giọng đọc',file:asset.file,mime:asset.mime}];
   }
   await store.updateJob(job.id,{state:'succeeded',progress:100,message:'Hoàn thành',outputs,finishedAt:new Date().toISOString(),elapsed:(Date.now()-started)/1000});

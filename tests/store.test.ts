@@ -3,6 +3,7 @@ import { mkdtemp, rm } from 'node:fs/promises';
 import os from 'node:os';
 import path from 'node:path';
 import { Store } from '../src/lib/store';
+import {timeline} from '../src/lib/model';
 let root:string; let store:Store;
 beforeEach(async()=>{root=await mkdtemp(path.join(os.tmpdir(),'crevid-test-'));store=new Store(root);});
 afterEach(async()=>{await rm(root,{recursive:true,force:true});});
@@ -33,4 +34,19 @@ it('allows only one running job on the local worker queue',async()=>{
  const a=await store.createProject('One');const b=await store.createProject('Two');
  await store.enqueue(a.id,'render',{preset:'draft'},a.revision);await store.enqueue(b.id,'render',{preset:'draft'},b.revision);
  expect(await store.claimJob()).toBeDefined();expect(await store.claimJob()).toBeUndefined();
+});
+it('keeps local narration as an asset without attaching it to changed text',async()=>{
+ const p=await store.createProject('Tin local');const job=await store.enqueue(p.id,'voice',{sceneId:p.scenes[0].id,provider:'local',voiceId:'female',speed:1},p.revision);
+ p.scenes[0].text='Lời đọc mới';await store.saveProject(p,p.revision);
+ await store.attachVoice(job,{id:'audio',name:'Voice',kind:'audio',file:'audio.wav',mime:'audio/wav',bytes:100,duration:2});
+ const updated=await store.getProject(p.id);expect(updated.assets).toHaveLength(1);expect(updated.scenes[0].voice).toBeUndefined();
+});
+
+it('automatically shortens the persisted timeline when a TTS job attaches its audio',async()=>{
+ const p=await store.createProject('Liền mạch');
+ const job=await store.enqueue(p.id,'voice',{sceneId:p.scenes[0].id,provider:'local',voiceId:'female',speed:1},p.revision);
+ await store.attachVoice(job,{id:'audio',name:'Voice',kind:'audio',file:'audio.wav',mime:'audio/wav',bytes:100,duration:2.01});
+ const updated=await store.getProject(p.id);const scenes=timeline(updated);
+ expect(scenes[0].duration).toBe(61);expect(scenes[1].from).toBe(61);
+ expect(updated.scenes[0].voice?.assetId).toBe('audio');
 });

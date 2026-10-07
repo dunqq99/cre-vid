@@ -3,9 +3,9 @@ import {newProject,newScene,projectSchema,sceneSchema} from '../src/lib/model';
 import {bodyWindow} from '../src/video/body-layout';
 it('removes only untouched legacy endings and retains edited endings as Body',()=>{
  const p=newProject();expect(p.scenes.map(s=>s.kind)).toEqual(['intro','body']);
- const ending={...newScene(),kind:'outro'};
+ const ending={...newScene(),kind:'outro',muteOriginal:true}; // historical default
  const migrated=projectSchema.parse({...p,scenes:[...p.scenes,ending]});expect(migrated.scenes).toHaveLength(2);
- for(const change of [{text:'Lời kết đã biên tập'},{mediaId:'photo'},{signOpacity:.5},{duration:9}]){
+ for(const change of [{text:'Lời kết đã biên tập'},{mediaId:'photo'},{signOpacity:.5},{duration:9},{muteOriginal:false}]){
   const result=projectSchema.parse({...p,scenes:[...p.scenes,{...ending,...change}]});
   expect(result.scenes).toHaveLength(3);expect(result.scenes[2]).toMatchObject({...change,kind:'body',id:ending.id});
  }

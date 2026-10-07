@@ -16,7 +16,7 @@ npm run dev
 
 Trên **Windows CMD**, dùng `copy .env.example .env.local` thay cho `cp`. Khi cập nhật một bản đã cài, chạy `git pull` và `npm ci`; giữ nguyên `.env.local` và `.data` của bạn.
 
-Ứng dụng mở và dựng video local được khi chưa có khóa API. Tạo giọng AI và đăng Facebook/X cần cấu hình riêng; có thể nhập file giọng đọc của bạn. Repository có mã nguồn, font, ảnh tham chiếu, cấu hình, tài liệu, kiểm thử và video demo nhỏ; không chứa dữ liệu dự án cá nhân, token, `.env.local`, `node_modules` hay `.next`.
+Ứng dụng mở và dựng video local được khi chưa có khóa API. TTS local cần chạy `npm run tts:setup` một lần để tải model; đăng Facebook/X cần cấu hình riêng. Có thể nhập file giọng đọc của bạn. Repository có mã nguồn, font, ảnh tham chiếu, cấu hình, tài liệu, kiểm thử và video demo nhỏ; không chứa dữ liệu dự án cá nhân, token, `.env.local`, `node_modules` hay `.next`.
 
 Mở **http://127.0.0.1:3000**. Lệnh trên chạy cả web và worker render. Giữ terminal chạy; đóng tab không dừng job. Dừng bằng Ctrl+C. Dữ liệu dự án, media, lịch sử và file render lưu trong `.data/`; sao lưu cả thư mục này khi cần.
 
@@ -30,19 +30,35 @@ Chạy bản tối ưu local: `npm run build`, sau đó `npm start`. Lệnh `npm
 
 1. **Input:** thêm ảnh/video hoặc dán URL bài báo. Khi dán URL, ứng dụng tự trích nội dung, nhập tối đa 6 ảnh mới và đề xuất kịch bản. Xem bản nháp trong Kịch bản rồi chọn **Dùng bản nháp & gắn ảnh**; cảnh cũ chỉ được thay sau thao tác này. Có thể nhập thủ công nếu website chặn truy cập.
 2. **Kịch bản:** chọn cảnh trên timeline, sửa tiêu đề, lời đọc và nguồn. Thêm, xóa hoặc sắp xếp cảnh; dữ liệu tự lưu.
-3. **Voice:** nhập MP3/WAV cho cảnh, hoặc tạo TTS khi đã cấu hình nhà cung cấp. Cảnh tự dài ra theo audio. Đổi lời đọc sẽ yêu cầu làm lại voice.
+3. **Voice:** nhập MP3/WAV cho cảnh, hoặc tạo TTS local với giọng Nam/Nữ sau khi cài model. Cảnh tự dài ra theo audio. Đổi lời đọc sẽ yêu cầu làm lại voice.
 4. **Studio:** chọn **Chỉ Intro** (khung tiêu đề chỉ xuất hiện ở cảnh mở đầu) hoặc **Toàn video** (giữ một tiêu đề xuyên suốt). Phụ đề nằm trên khung tiêu đề; nhãn/sign nằm phía trên bên trái, chừa lề phải và đáy tránh giao diện nền tảng. Có bảy mẫu thiết kế (gồm Thể thao, Phim ảnh, YouTube Shorts) và ba mẫu đơn giản. Chọn UI tham chiếu TikTok/Reels; tải logo/nhạc trực tiếp, chọn logo + tên hoặc một trong hai, chỉnh kích cỡ logo 50–200%, màu và watermark. Thuộc tính cảnh cho phép chỉnh thời lượng, nhãn, crop và điểm bắt đầu clip.
 5. **Output:** xem trước, duyệt nội dung và chọn bản nháp hoặc 1080p. Tải MP4, SRT, ảnh bìa và nội dung bài đăng khi hoàn tất. Phần **Xuất bản** cho phép kết nối Facebook Page/X, chọn bản render chính, duyệt caption và đăng qua worker. Xem [hướng dẫn cấu hình](docs/17-social-publishing.md).
 
 Hỗ trợ 9:16, 16:9 và 1:1; video cuối tối đa 180 giây. Media đầu vào tối đa 100 MB/file, 50 file/dự án. Clip ngắn được lặp; tiếng gốc có thể tắt. Thời điểm phụ đề hiện là ước lượng theo độ dài câu, chưa căn chính xác từng từ theo âm thanh.
 
-## Giọng Ngọc Huyền và AI
+Âm thanh được chọn riêng cho từng cảnh: ưu tiên TTS hoặc bản thu đang khớp lời đọc; nếu không có giọng đọc thì phát tiếng gốc video ở âm lượng 100%, trừ khi bật **Tắt tiếng gốc**. Cảnh mới mặc định giữ tiếng gốc. Với dự án cũ, bỏ chọn **Tắt tiếng gốc** ở cảnh cần dùng âm thanh video. TTS ở Intro không làm tắt tiếng các cảnh Nội dung; để trống tiêu đề/lời đọc cũng không làm mất tiếng gốc.
 
-Adapter Vbee dùng API thật, mặc định mã Ngọc Huyền `hn_female_ngochuyen_full_48k-fhg`. Cấu hình `VBEE_APP_ID`, `VBEE_TOKEN`, `VBEE_VOICE_CODE` từ tài khoản Vbee được cấp quyền trong `.env.local`, rồi khởi động lại. API realtime đang giới hạn 300 ký tự/đoạn; dùng nút chia đoạn khi cần.
+Giao diện gồm thanh công cụ, danh sách cảnh bên trái, các tab biên tập ở giữa, xem trước và thuộc tính bên phải, timeline và thanh trạng thái phía dưới. Khung xem trước dùng hết chiều rộng cột phải; cuộn cột này để chỉnh thuộc tính cảnh.
 
-Adapter Azure cần `AZURE_SPEECH_KEY` và `AZURE_SPEECH_REGION`. Khóa chỉ ở server, không nhập vào trình duyệt hoặc commit Git. Chưa kiểm chứng gọi TTS thật do chưa có tài khoản/khóa; kiểm thử hiện xác nhận cấu trúc request, giới hạn và xử lý văn bản. Nhập audio có sẵn hoạt động độc lập với TTS.
+## TTS local: Nam / Nữ
 
-Tài liệu chính thức: [Vbee realtime API](https://api-docs.vbee.vn/vbee-api/text-to-speech/realtime-api).
+Dùng **VieNeu-TTS v3 Turbo**, một model ONNX trên CPU với hai giọng cố định: **Hải Đăng (nam)** và **Trúc Ly (nữ)**. Không cần API key, không gọi Vbee/Azure và không tính phí theo ký tự. Model và preset được công bố dưới Apache-2.0; giữ license/notice khi phân phối lại. [Giấy phép và quyền dùng audio thương mại](https://huggingface.co/pnnbao-ump/VieNeu-TTS-v3-Turbo#-usage-rights--licensing-faq).
+
+Cần Python **3.12–3.13**. Từ thư mục dự án:
+
+```sh
+npm run tts:setup
+npm run dev
+```
+
+Setup tạo `.venv-tts`, cài dependencies và tải model vào `.data/tts`. Lần đầu cần Internet và đủ dung lượng đĩa. Setup chỉ báo thành công sau khi tạo được cả hai WAV mẫu bằng tiến trình đã tắt mạng; nghe ở `.data/tts/samples/male.wav` và `female.wav`. `manifest.json` ghi model revision, dependencies, checksum và số đo thực tế. Những file model/audio này không được commit vào Git.
+
+Nếu Python không nằm trong PATH, đặt `CREVID_PYTHON` thành đường dẫn Python 3.12–3.13 để setup; `CREVID_TTS_PYTHON` chỉ dùng khi muốn chọn virtual environment khác. `CREVID_DATA_DIR` đổi thư mục dữ liệu chung cho web, worker và model. Khi chuyển máy cần chạy setup lại, không sao chép `.venv-tts`.
+
+Trong **Voice**, mặc định tốc độ **1×** để giữ nhịp đọc gốc; chọn Nam/Nữ → chỉnh tốc độ → **Tạo giọng cho cảnh này**. Worker sinh WAV trên máy, tự chia câu dài bên trong tác vụ, rồi gắn audio vào cảnh. Cảnh tự co/giãn theo thời lượng giọng đọc để chuyển ngay sang cảnh tiếp theo; ô thời lượng hiển thị tự động khi có audio hợp lệ. Tốc độ 0.5–1.5× dùng FFmpeg giữ cao độ. Nhập MP3/WAV vẫn hoạt động. Audio đã tạo tiếp tục dùng được khi không có model; job Vbee/Azure cũ cần tạo lại bằng local. Không có fallback cloud.
+
+Runtime dùng model đã tải, khóa revision và chặn kết nối mạng Python. Hủy hoặc timeout sẽ dừng tiến trình TTS; model được giải phóng sau 30 giây rảnh hoặc trước render. Tối đa 3.000 ký tự/cảnh và 10 phút chờ mỗi tác vụ. Chất lượng giọng và thời gian sinh phụ thuộc nội dung/máy; luôn nghe thử trước khi xuất bản.
+
 
 ## Render và tốc độ
 

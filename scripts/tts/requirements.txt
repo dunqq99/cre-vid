@@ -1,0 +1,8 @@
+# Preset-only CPU runtime; SDK is installed separately with --no-deps.
+# Gradio, training and voice-cloning dependencies are intentionally excluded.
+sea-g2p==0.10.0
+onnxruntime==1.30.0
+numpy
+soundfile
+tokenizers
+huggingface_hub

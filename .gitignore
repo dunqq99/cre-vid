@@ -1,4 +1,6 @@
 node_modules/
+.venv-tts/
+__pycache__/
 .next/
 .data/
 .env*

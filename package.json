@@ -10,6 +10,7 @@
     "build": "next build",
     "start": "concurrently -k -n web,worker \"next start --hostname 127.0.0.1\" \"tsx --env-file-if-exists=.env.local src/worker.ts\"",
     "test": "vitest run",
+    "tts:setup": "node --env-file-if-exists=.env.local scripts/tts/setup.mjs",
     "typecheck": "next typegen && tsc --noEmit",
     "test:e2e": "playwright test",
     "benchmark": "tsx --env-file-if-exists=.env.local scripts/benchmark.ts"

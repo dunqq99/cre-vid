@@ -60,18 +60,3 @@ export function extractArticle(html:string,url:string){
  const text=article?.textContent?.replace(/\s+/g,' ').trim();if(!text||text.length<40)throw new AppError('Không lấy được nội dung chính. Hãy dán văn bản thủ công.');
  return {url,title:(article?.title||pageTitle||'Bài nguồn').slice(0,500),text:text.slice(0,100000),fetchedAt:new Date().toISOString(),images:images.slice(0,12)};
 }
-export function vbeeRequest(text:string,voiceCode:string,speed:number){if(!text.trim()||text.length>300)throw new AppError('Vbee hỗ trợ tối đa 300 ký tự mỗi đoạn. Hãy chia nhỏ lời đọc.');return {text:text.trim(),voiceCode,speed,mode:'sync',outputFormat:'mp3',bitrate:128};}
-export function azureSsml(text:string,voice:string,speed:number){if(!/^vi-VN-[A-Za-z]+Neural$/.test(voice))throw new AppError('Giọng Azure không hợp lệ.');const safe=text.replace(/[<>&"']/g,c=>({'<':'&lt;','>':'&gt;','&':'&amp;','"':'&quot;',"'":'&apos;'}[c]!));return `<speak version="1.0" xml:lang="vi-VN"><voice name="${voice}"><prosody rate="${Math.round((speed-1)*100)}%">${safe}</prosody></voice></speak>`;}
-export function providerStatus(){return {vbee:!!(process.env.VBEE_TOKEN&&process.env.VBEE_APP_ID),azure:!!(process.env.AZURE_SPEECH_KEY&&process.env.AZURE_SPEECH_REGION),vbeeVoice:process.env.VBEE_VOICE_CODE||'hn_female_ngochuyen_full_48k-fhg'};}
-export async function synthesize(text:string,provider:'vbee'|'azure',voiceId:string,speed:number,signal?:AbortSignal){
- if(!providerStatus()[provider])throw new AppError(`Chưa cấu hình ${provider==='vbee'?'Vbee App ID/Token':'Azure Speech Key/Region'} trên server. Bạn có thể nhập MP3/WAV.`);
- let response:Response;
- const timeout=AbortSignal.timeout(120000);const combined=signal?AbortSignal.any([timeout,signal]):timeout;
- if(provider==='vbee')response=await fetch('https://api.vbee.vn/v1/tts',{method:'POST',headers:{Authorization:`Bearer ${process.env.VBEE_TOKEN}`,'App-Id':process.env.VBEE_APP_ID!,'Content-Type':'application/json'},body:JSON.stringify(vbeeRequest(text,voiceId,speed)),signal:combined});
- else{
-  const region=process.env.AZURE_SPEECH_REGION!;if(!/^[a-z0-9-]+$/.test(region))throw new AppError('Azure region không hợp lệ.');
-  response=await fetch(`https://${region}.tts.speech.microsoft.com/cognitiveservices/v1`,{method:'POST',headers:{'Ocp-Apim-Subscription-Key':process.env.AZURE_SPEECH_KEY!,'Content-Type':'application/ssml+xml','X-Microsoft-OutputFormat':'audio-48khz-192kbitrate-mono-mp3'},body:azureSsml(text,voiceId,speed),signal:combined});
- }
- if(!response.ok||response.headers.get('content-type')?.includes('json'))throw new AppError(`Dịch vụ giọng đọc từ chối yêu cầu (${response.status}). Kiểm tra khóa, giọng đọc và hạn mức.`);
- const data=Buffer.from(await response.arrayBuffer());if(data.length<100||data.length>30_000_000)throw new AppError('Audio trả về không hợp lệ.');return data;
-}
